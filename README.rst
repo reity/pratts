@@ -4,7 +4,7 @@ pratts
 
 Pure-Python library that enables generation and verification of Pratt certificates for prime numbers.
 
-|pypi| |readthedocs|
+|pypi| |readthedocs| |actions| |coveralls|
 
 .. |pypi| image:: https://badge.fury.io/py/pratts.svg
    :target: https://badge.fury.io/py/pratts
@@ -13,6 +13,14 @@ Pure-Python library that enables generation and verification of Pratt certificat
 .. |readthedocs| image:: https://readthedocs.org/projects/pratts/badge/?version=latest
    :target: https://pratts.readthedocs.io/en/latest/?badge=latest
    :alt: Read the Docs documentation status.
+
+.. |actions| image:: https://github.com/reity/pratts/workflows/lint-test-cover-docs/badge.svg
+   :target: https://github.com/reity/pratts/actions/workflows/lint-test-cover-docs.yml
+   :alt: GitHub Actions status.
+
+.. |coveralls| image:: https://coveralls.io/repos/github/reity/pratts/badge.svg?branch=main
+   :target: https://coveralls.io/github/reity/pratts?branch=main
+   :alt: Coveralls test coverage summary.
 
 Installation and Usage
 ----------------------
