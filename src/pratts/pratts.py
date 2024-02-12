@@ -1,6 +1,8 @@
 """
-Pure-Python library that enables generation and verification of Pratt
-certificates for prime numbers.
+Pure-Python library that enables generation and verification of
+`Pratt certificates \
+<https://en.wikipedia.org/wiki/Primality_certificate#Pratt_certificates>`__
+for prime numbers.
 """
 from __future__ import annotations
 from typing import Optional, Dict, Sequence, Iterable
@@ -228,15 +230,15 @@ def pratts(
                 'cannot find all prime factors for ' + str(p - 1)
             )
 
-        # Generate an entry for the certificate.
-        certificate.update({p: list(sorted(factors))})
-
         # At this point, all prime factors of ``p - 1`` are
         # known. If using these prime factors within Lucas'
         # theorem does not prove that the input is prime, it
         # must be composite.
         if not _lucas(p, factors):
             return None # This candidate is definitively composite.
+
+        # Generate an entry for the certificate.
+        certificate.update({p: list(sorted(factors))})
 
         # For each factor, add a certificate of its primality to
         # the joint certificate being built up in this invocation.

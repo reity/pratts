@@ -2,7 +2,7 @@
 pratts
 ======
 
-Pure-Python library that enables generation and verification of Pratt certificates for prime numbers.
+Pure-Python library that enables generation and verification of `Pratt certificates <https://en.wikipedia.org/wiki/Primality_certificate#Pratt_certificates>`__ for prime numbers.
 
 |pypi| |readthedocs| |actions| |coveralls|
 
