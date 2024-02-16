@@ -5,14 +5,33 @@ Pure-Python library that enables generation and verification of
 for prime numbers.
 """
 from __future__ import annotations
-from typing import Optional, Dict, Sequence, Iterable
+from typing import Union, Optional, Dict, Sequence, Iterable, Callable
 import doctest
 from secrets import randbelow
+
+def _valid(primes: Iterable[int]) -> Iterable[int]:
+    """
+    Confirm that the result of a callable prime factors parameter to
+    :obj:`pratts` is an iterable of valid integers.
+    """
+    if not isinstance(primes, Iterable):
+        raise RuntimeError('primes parameter callable must return an iterable')
+
+    for p in primes:
+        if not isinstance(p, int):
+            raise RuntimeError('primes parameter callable must return integers')
+
+        if p < 1:
+            raise RuntimeError(
+                'primes parameter callable must return positive integers'
+            )
+
+        yield p
 
 def _lucas(n: int, factors: Iterable[int]) -> bool:
     """
     Confirm that the input ``n`` is prime using Lucas' theorem (assuming
-    that the supplied list of ``factors`` contains only prime numbers).
+    that the supplied iterable of ``factors`` contains only prime numbers).
 
     >>> _lucas(2, [])
     True
@@ -37,13 +56,23 @@ def _lucas(n: int, factors: Iterable[int]) -> bool:
 
 def pratts(
         argument: int,
-        primes: Iterable[int] = None,
+        primes: Union[Iterable[int], Callable[[int], Iterable[int]]] = None,
         partial: bool = False
     ) -> Optional[Dict[int, Optional[Sequence[int]]]]:
     # pylint: disable=too-many-branches
     """
     Build a Pratt certificate for the supplied integer argument and the
     accompanying iterable of prime factors.
+
+    :param argument: The prime number for which to generate a certificate.
+    :param primes: List of -- or a function that returns -- prime factors.
+    :param partial: Flag to allow generation of a best-effort partial certificate.
+
+    This function returns a dictionary in which the keys consist of all primes
+    ``p`` for which a certificate was found during the process of generating
+    the certificate for the argument (including the argument itself). Each key
+    is associated with the list of prime factors of ``p - 1`` (such that every
+    prime factor in these lists also appears as a key in the dictionary).
 
     >>> pratts(2)
     {2: []}
@@ -61,6 +90,28 @@ def pratts(
     {2: [], 3: [2], 5: [2], 241: [2, 3, 5]}
     >>> pratts(257, [2])
     {2: [], 257: [2]}
+
+    It is also possible to supply a function that returns all prime factors
+    of its integer input (as an iterable of integers). Note that this function
+    must return its input as one of the factors of that input.
+
+    >>> pratts(241, lambda n: [k for k in range(2, n + 1) if n % k == 0])
+    {2: [], 3: [2], 5: [2], 241: [2, 3, 5]}
+
+    An exception is raised If the supplied function behaves incorrectly.
+    
+    >>> pratts(241, lambda n: 1)
+    Traceback (most recent call last):
+      ...
+    RuntimeError: primes parameter callable must return an iterable
+    >>> pratts(241, lambda n: ['abc'])
+    Traceback (most recent call last):
+      ...
+    RuntimeError: primes parameter callable must return integers
+    >>> pratts(241, lambda n: [-1])
+    Traceback (most recent call last):
+      ...
+    RuntimeError: primes parameter callable must return positive integers
 
     An example involving a larger prime is presented below.
 
@@ -153,7 +204,7 @@ def pratts(
     >>> pratts(3, primes=2)
     Traceback (most recent call last):
       ...
-    TypeError: prime factors must be supplied as an iterable
+    TypeError: primes parameter must be an iterable or callable
     >>> pratts(3, ['abc'])
     Traceback (most recent call last):
       ...
@@ -176,20 +227,21 @@ def pratts(
     if argument < 1:
         raise ValueError('argument must be a positive integer')
 
-    if not isinstance(primes, Iterable):
-        raise TypeError('prime factors must be supplied as an iterable')
+    if not isinstance(primes, (Iterable, Callable)):
+        raise TypeError('primes parameter must be an iterable or callable')
 
     # Ensure that the iterable is retained and reusable.
-    primes = list(primes)
+    if isinstance(primes, Iterable):
+        primes = list(primes)
 
-    if not all(isinstance(p, int) for p in primes):
-        raise ValueError('every prime factor must be an integer')
+        if not all(isinstance(p, int) for p in primes):
+            raise ValueError('every prime factor must be an integer')
 
-    if not all(p > 1 for p in primes):
-        raise ValueError('every prime factor must be greater than 1')
+        if not all(p > 1 for p in primes):
+            raise ValueError('every prime factor must be greater than 1')
 
-    # The prime factors must be sorted in ascending order.
-    primes = list(sorted(primes))
+        # The prime factors must be sorted in ascending order.
+        primes = list(sorted(primes))
 
     # Handle the base cases.
     if argument == 2:
@@ -197,7 +249,10 @@ def pratts(
 
     # Build a dictionary representing a certificate for the supplied argument.
     certificate = {}
-    for p in primes + [argument]:
+    for p in (
+        (primes if isinstance(primes, list) else list(_valid(primes(argument)))) +
+        [argument]
+    ):
         # The prime ``2`` is the base case; its entry in a
         # certificate is always an empty list by definition.
         if p == 2:
@@ -208,7 +263,7 @@ def pratts(
         # list of prime factors.
         n = p - 1
         factors = set()
-        for q in primes:
+        for q in primes if isinstance(primes, list) else list(_valid(primes(n))):
             if q < p:
                 while n % q == 0:
                     n = n // q
@@ -245,7 +300,11 @@ def pratts(
         for f in factors:
             certificate_ = pratts(
                 f,
-                primes=[p for p in primes if p < f]
+                primes=(
+                    [p for p in primes if p < f]
+                    if isinstance(primes, list)
+                    else primes
+                )
             )
 
             # A recursive invocation should never return ``None``,

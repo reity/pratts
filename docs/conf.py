@@ -46,7 +46,8 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'sphinx_autodoc_typehints'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -57,20 +58,14 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build']
 
+# Do not qualify class names with module and submodule names.
+add_module_names = False
+
 # Options to configure autodoc extension behavior.
 autodoc_member_order = 'bysource'
-autodoc_default_options = {
-    'special-members': True,
-    'exclude-members': ','.join([
-        '__init__',
-        '__weakref__',
-        '__module__',
-        '__hash__',
-        '__dict__',
-        '__abstractmethods__'
-    ])
-}
 autodoc_preserve_defaults = True
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "documented"
 
 # Allow references/links to definitions found in the Python documentation.
 intersphinx_mapping = {
