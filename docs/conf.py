@@ -64,8 +64,8 @@ add_module_names = False
 # Options to configure autodoc extension behavior.
 autodoc_member_order = 'bysource'
 autodoc_preserve_defaults = True
-autodoc_typehints = "description"
-autodoc_typehints_description_target = "documented"
+autodoc_typehints = 'description'
+autodoc_typehints_description_target = 'documented'
 
 # Allow references/links to definitions found in the Python documentation.
 intersphinx_mapping = {
