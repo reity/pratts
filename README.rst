@@ -37,6 +37,37 @@ The library can be imported in the usual manner:
     import pratts
     from pratts import pratts
 
+Examples
+^^^^^^^^
+To generate a `Pratt certificate <https://en.wikipedia.org/wiki/Primality_certificate#Pratt_certificates>`__ for a prime number, it is sufficient to supply an iterable of appropriately chosen primes that make it possible to recursively construct the certificate:
+
+.. code-block:: python
+
+    >>> pratts(241, [2, 3, 5])
+    {2: [], 3: [2], 5: [2], 241: [2, 3, 5]}
+
+
+.. |primefactors| replace:: ``primefactors``
+.. _primefactors: https://docs.sympy.org/latest/modules/ntheory.html#sympy.ntheory.factor_.primefactors
+
+Alternatively, a function that returns prime factors can be supplied (such as the |primefactors|_ function that is available in the `SymPy library <https://www.sympy.org/>`__):
+
+.. code-block:: python
+
+    >>> from sympy import primefactors
+    >>> pratts(241, primefactors)
+    {2: [], 3: [2], 5: [2], 241: [2, 3, 5]}
+
+A certificate can be verified by supplying its keys (such that the same certificate is generated and returned):
+
+.. code-block:: python
+
+    >>> certificate = pratts(1011235813471123581347, primefactors)
+    >>> pratts(1011235813471123581347, certificate.keys()) is not None
+    True
+    >>> pratts(1011235813471123581347, certificate.keys()) == certificate
+    True
+
 Development
 -----------
 All installation and development dependencies are fully specified in ``pyproject.toml``. The ``project.optional-dependencies`` object is used to `specify optional requirements <https://peps.python.org/pep-0621>`__ for various development tasks. This makes it possible to specify additional options (such as ``docs``, ``lint``, and so on) when performing installation using `pip <https://pypi.org/project/pip>`__:
@@ -87,7 +118,7 @@ The version number format for this library and the changes to the library associ
 
 Publishing
 ^^^^^^^^^^
-This library can be published as a `package on PyPI <https://pypi.org/project/parts>`__ via the GitHub Actions workflow found in ``.github/workflows/build-publish-sign-release.yml`` that follows the `recommendations found in the Python Packaging User Guide <https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/>`__.
+This library can be published as a `package on PyPI <https://pypi.org/project/pratts>`__ via the GitHub Actions workflow found in ``.github/workflows/build-publish-sign-release.yml`` that follows the `recommendations found in the Python Packaging User Guide <https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/>`__.
 
 Ensure that the correct version number appears in ``pyproject.toml``, and that any links in this README document to the Read the Docs documentation of this package (or its dependencies) have appropriate version numbers. Also ensure that the Read the Docs project for this library has an `automation rule <https://docs.readthedocs.io/en/stable/automation-rules.html>`__ that activates and sets as the default all tagged versions.
 
